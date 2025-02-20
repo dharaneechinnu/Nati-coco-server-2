@@ -7,6 +7,7 @@ router.route('/Register').post(require('../Controller/User/AuthController').regi
 router.route('/users').get(require('../Controller/User/AuthController').getUsers);
 
 router.route('/generate-otp').post(require('../Controller/User/AuthController').getOtp);
+
 router.route('/verify-otp').post(require('../Controller/User/AuthController').Verifyotp);
 router.route('/reset-password').post(require('../Controller/User/AuthController').resetPassword);
 router.route('/resetpass-otp').patch(require('../Controller/User/AuthController').respassword);
