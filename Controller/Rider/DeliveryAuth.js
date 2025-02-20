@@ -118,7 +118,8 @@ const sendOtp = async (req, res) => {
 
       // Format the phone number for verification using E.164 format
       const finalPhoneNumber = parsedPhoneNumber.format('E.164');
-console.log("FinalNumber : ",finalPhoneNumber);
+      console.log("FinalNumber : ", finalPhoneNumber);
+
       // Check if the user exists
       const user = await deliveryPersonModel.findOne({ phonenumber: finalPhoneNumber });
       if (!user) {
@@ -144,7 +145,7 @@ console.log("FinalNumber : ",finalPhoneNumber);
               to: finalPhoneNumber
           });
 
-          console.log("OTP sent successfully via Twilio:", messages.sid);
+          console.log("OTP sent successfully via Twilio:", smsResponse.sid);
 
           return res.status(200).json({
               message: "OTP sent successfully to your phone",
