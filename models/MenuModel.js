@@ -4,7 +4,6 @@ const MenuSchema = new mongoose.Schema({
   storeId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'citystore', 
-    required: true,
   },
   category: {
     type: String, 
@@ -23,6 +22,12 @@ const MenuSchema = new mongoose.Schema({
   price: {
     type: Number,
     required: true,
+  },
+  Grams:{
+    type:Number,
+  },
+  Piece:{
+    type:String,
   },
   stock: {
     type: Number,

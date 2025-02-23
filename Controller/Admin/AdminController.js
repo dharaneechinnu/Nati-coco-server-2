@@ -4,6 +4,9 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const CityOwnerModels = require('../../models/CityOwnerModel');
+const multer = require('multer');
+const path = require('path');
+const MenuModels = require('../../models/MenuModel');
 
 //Admin Login
 const loginAdmin = async (req, res) => {
@@ -142,4 +145,63 @@ const getCityOwners = async (req, res) => {
 };
 
 
-module.exports = {loginAdmin,AddChickenStore,getCityOwners};
+// Multer Setup for File Uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'ImageStore/'); 
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = `${Date.now()}-${file.originalname}`;
+    cb(null, uniqueName);
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type. Only JPEG, PNG, and JPG are allowed.'), false);
+  }
+};
+
+const upload = multer({ storage, fileFilter });
+
+const addAdminMenuItem = async (req, res) => {
+  upload.single('image')(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: 'File upload failed', error: err.message });
+    }
+
+    const { Grams,Piece,category, subCategory, itemName, description, price, availability } = req.body;
+
+    // Ensure an image is uploaded
+    if (!req.file) {
+      return res.status(400).json({ message: 'Image file is required' });
+    }
+
+    try {
+      const menuItem = await MenuModels.create({
+        category,
+        subCategory,
+        itemName,
+        description,
+        price,
+        availability,
+        Grams,
+        Piece,
+        image: `${req.file.filename}`, // Save image path
+      });
+
+      res.status(201).json({
+        message: 'Menu item added successfully',
+        menuItem,
+      });
+    } catch (error) {
+      console.error('Error adding menu item:', error);
+      res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+  });
+
+};
+module.exports = {loginAdmin,AddChickenStore,getCityOwners,addAdminMenuItem};

@@ -205,6 +205,7 @@ const getOrderAnalytics = async (req, res) => {
     }
 };
 
+
 const findNearestStoreAndDisplayMenu = async (req, res) => {
   try {
     const { latitude, longitude } = req.body;
@@ -221,7 +222,8 @@ const findNearestStoreAndDisplayMenu = async (req, res) => {
 
     const userLocation = { latitude: lat, longitude: lon };
     const allStores = await Store.find();
-    if (!allStores || !allStores.length) {
+
+    if (!allStores || allStores.length === 0) {
       return res.status(404).json({ message: 'No stores found' });
     }
 
@@ -230,75 +232,46 @@ const findNearestStoreAndDisplayMenu = async (req, res) => {
       store.locations?.longitude !== undefined
     );
 
-    if (!validStores.length) {
+    if (validStores.length === 0) {
       return res.status(404).json({ message: 'No valid stores found' });
     }
 
-    const storesWithinRange = validStores.filter(store => {
+    // Check if user is within range (10 km) of any store
+    const userWithinRange = validStores.some(store => {
       const storeLocation = { 
         latitude: store.locations.latitude, 
         longitude: store.locations.longitude 
       };
       const distanceToUser = geolib.getDistance(userLocation, storeLocation);
-        //Change based on needs from client
       return distanceToUser <= 10000; 
     });
 
-    if (!storesWithinRange.length) {
-      return res.status(404).json({ message: 'No nearby stores within 10 km found' });
-    }
+    // Fetch all menu items (without filtering by store)
+    const allMenuItems = await MenuModels.find({ availability: true });
 
-    
-    const nearestStore = storesWithinRange.reduce((closest, store) => {
-      const storeLocation = { 
-        latitude: store.locations.latitude, 
-        longitude: store.locations.longitude 
-      };
-      const distanceToUser = geolib.getDistance(userLocation, storeLocation);
-
-      if (!closest || distanceToUser < closest.distance) {
-        return { id: store._id, distance: distanceToUser };
-      }
-      return closest;
-    }, null);
-
-    if (!nearestStore) {
-      return res.status(404).json({ message: 'Unable to find a nearest store' });
-    }
-
-    console.log(nearestStore.id);
-
-    const storeMenu = await MenuModels.find({
-      storeId: nearestStore.id,
-      availability: true
-    });
-
-
-    const storlocation = await Store.findById(nearestStore.id);
-
-    if (!storeMenu.length) {
-      return res.status(404).json({ message: 'No menu items available at the nearest store' });
+    if (!allMenuItems.length) {
+      return res.status(404).json({ message: 'No menu items available' });
     }
 
     res.json({
-      message: `Nearest store menu retrieved successfully`,
-      nearestStoreId: nearestStore.id,
-      menu: storeMenu.map(item => ({
+      message: `Menu retrieved successfully`,
+      canOrder: userWithinRange, // true if within 10 km, false otherwise
+      menu: allMenuItems.map(item => ({
         ...item._doc,
-        image: `http://${req.headers.host}/ImageStore/${item.image}`, // Ensure correct path
+        image: `http://${req.headers.host}/ImageStore/${item.image}`
       })),
-      StoreLocations:storlocation
     });
-    
-    
+
   } catch (error) {
-    console.error("Error finding nearest store and its menu:", error);
+    console.error("Error retrieving menu:", error);
     res.status(500).json({ 
       error: 'An error occurred while processing your request', 
       details: error.message 
     });
   }
 };
+
+
 
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString(); // Generates a 6-digit OTP
