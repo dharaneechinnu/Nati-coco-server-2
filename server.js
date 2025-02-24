@@ -18,6 +18,7 @@ const userRoute = require('./router/UserRouter');
 const adminRouter = require('./router/AdminRouter');
 const chickenStoreRouter = require('./router/ChickenStoreRouter');
 const locationRouter = require('./router/LocationRouter');
+const DelSalaryRouter = require('./router/DelSalaryRouter');
 
 const app = express();
 const server = http.createServer(app);
@@ -88,6 +89,7 @@ app.use('/api/user', userRoute);
 app.use('/Admin', adminRouter);
 app.use('/citystore', chickenStoreRouter);
 app.use('/Adminstore/delivery', DelPersonRouter);
+app.use('/delSal', DelSalaryRouter);
 app.use('/location', locationRouter);
 
 // Serve images dynamically
