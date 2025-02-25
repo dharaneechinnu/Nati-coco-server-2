@@ -1,16 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const router = express.Router();
+const AuthController = require('../Controller/User/AuthController');
 
-router.route('/login').post(require('../Controller/User/AuthController').login);
-router.route('/Register').post(require('../Controller/User/AuthController').register);
-router.route('/users').get(require('../Controller/User/AuthController').getUsers);
-
-router.route('/generate-otp').post(require('../Controller/User/AuthController').getOtp);
-
-router.route('/verify-otp').post(require('../Controller/User/AuthController').Verifyotp);
-router.route('/reset-password').post(require('../Controller/User/AuthController').resetPassword);
-router.route('/resetpass-otp').patch(require('../Controller/User/AuthController').respassword);
-
+// **OTP Authentication Routes**
+router.post('/send-otp', AuthController.sendOtp); // Send OTP to user
+router.post('/verify-otp', AuthController.verifyOtp); // Verify OTP & Login
 
 module.exports = router;

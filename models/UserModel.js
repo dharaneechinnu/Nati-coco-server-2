@@ -1,38 +1,24 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
   mobileno: {
     type: String,
     required: true,
+    unique: true,
+  },
+  name: {
+    type: String,
+    default: null, // Optional, user can add later
   },
   verified: {
     type: Boolean,
+    default: false, // User is unverified until OTP is confirmed
   },
   otpToken: {
     type: String,
   },
   otpExpire: {
     type: Date,
-  },
-  resetPwdToken: {
-    type: String,
-    default: null,
-  },
-  resetPwdExpire: {
-    type: Date,
-    default: null,
   },
   liveLocation: {
     latitude: {
@@ -45,13 +31,13 @@ const userSchema = new mongoose.Schema({
     },
     timestamp: {
       type: Date,
-      default: Date.now, // Automatically records the last update time
+      default: Date.now, // Automatically updates when the location is updated
     },
   },
   addresses: [
     {
       type: {
-        type: String, // No enum constraint, allowing free text input
+        type: String, // Home, Work, etc.
         required: true,
       },
       address: {
@@ -76,7 +62,7 @@ const userSchema = new mongoose.Schema({
       },
     },
   ],
-});
+}, { timestamps: true });
 
-const userModel = mongoose.model('UsersLogins', userSchema);
+const userModel = mongoose.model('Users', userSchema);
 module.exports = userModel;
