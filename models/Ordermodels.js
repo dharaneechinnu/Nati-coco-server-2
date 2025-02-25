@@ -23,6 +23,9 @@ const OrderSchema = new mongoose.Schema(
         price: { type: Number, required: true },
       },
     ],
+    slots:{
+      type:String,
+    },
     amount: {
       type: Number,
       required: true,

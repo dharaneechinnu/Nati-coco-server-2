@@ -40,6 +40,7 @@ const createOrder = async (req, res) => {
       storeId,
       items,
       amount,
+      slots,
       paymentStatus,
       storeLocation,
       deliveryLocation,
@@ -74,6 +75,7 @@ const createOrder = async (req, res) => {
       storeLocation,
       deliveryLocation,
       deliveryDistance,
+      slots,
     });
 
     res.status(201).json({
