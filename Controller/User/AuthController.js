@@ -11,7 +11,7 @@ const twilioClient = twilio(accountSid, authToken);
 // Generate 6-digit OTP
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
-// 📌 **Send OTP to User**
+
 const sendOtp = async (req, res) => {
     try {
         const { mobileno } = req.body;
@@ -56,7 +56,7 @@ const sendOtp = async (req, res) => {
     }
 };
 
-// 📌 **Verify OTP & Login**
+
 const verifyOtp = async (req, res) => {
     try {
         const { mobileno, otp } = req.body;
