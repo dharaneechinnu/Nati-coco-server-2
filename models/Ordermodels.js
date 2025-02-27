@@ -13,7 +13,6 @@ const OrderSchema = new mongoose.Schema(
     storeId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "citystore",
-      required: true,
     },
     items: [
       {

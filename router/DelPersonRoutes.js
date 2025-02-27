@@ -15,8 +15,6 @@ router.patch('/resetpass-otp',resetPasswordConfirm)
 router.post('/postdetails',RiderToPostDetails)
 router.post('/rcdocument',uploadRcDocument)
 
-
-
 router.get('/:phonenumber', getRcDocument);
 router.post('/riderverified',getVerifiedDeliveryPersons);
 router.post('/riderUnverified',getUnverifiedDeliveryPersons);

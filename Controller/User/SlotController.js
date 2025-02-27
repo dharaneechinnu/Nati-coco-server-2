@@ -24,12 +24,20 @@ const addSlot = async (req, res) => {
 // Get Available Slots (Regular & Express)
 const getAvailableSlots = async (req, res) => {
     try {
-      const { date, type } = req.body; // Use req.query instead of req.body
+      const { date, type } = req.body;
+
+      if (!date) {
+        return res.status(400).json({ error: "Date is required" });
+      }
+
+      const parsedDate = new Date(date);
+      if (isNaN(parsedDate.getTime())) {
+        return res.status(400).json({ error: "Invalid date format" });
+      }
   
-      let filter = { date };
-      if (type) filter.type = type; // Filter by slot type (regular/express)
+      let filter = { date: parsedDate };
+      if (type) filter.type = type;
   
-      // Use $expr to compare bookedOrders with maxOrders
       filter.$expr = { $lt: ["$bookedOrders", "$maxOrders"] };
   
       const availableSlots = await Slot.find(filter);
@@ -51,4 +59,4 @@ const deleteSlot = async (req, res) => {
   }
 };
 
-module.exports = { addSlot, getAvailableSlots, deleteSlot };
+export { addSlot, getAvailableSlots, deleteSlot };
