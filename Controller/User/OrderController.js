@@ -207,7 +207,6 @@ const getOrderAnalytics = async (req, res) => {
     }
 };
 
-
 const findNearestStoreAndDisplayMenu = async (req, res) => {
   try {
     const { latitude, longitude } = req.body;
@@ -229,6 +228,7 @@ const findNearestStoreAndDisplayMenu = async (req, res) => {
       return res.status(404).json({ message: 'No stores found' });
     }
 
+    // Filter valid stores
     const validStores = allStores.filter(store => 
       store.locations?.latitude !== undefined && 
       store.locations?.longitude !== undefined
@@ -238,15 +238,29 @@ const findNearestStoreAndDisplayMenu = async (req, res) => {
       return res.status(404).json({ message: 'No valid stores found' });
     }
 
-    // Check if user is within range (10 km) of any store
-    const userWithinRange = validStores.some(store => {
+    // Find the nearest store
+    let nearestStore = null;
+    let minDistance = Infinity;
+
+    validStores.forEach(store => {
       const storeLocation = { 
         latitude: store.locations.latitude, 
         longitude: store.locations.longitude 
       };
-      const distanceToUser = geolib.getDistance(userLocation, storeLocation);
-      return distanceToUser <= 10000; 
+      const distance = geolib.getDistance(userLocation, storeLocation);
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestStore = store;
+      }
     });
+
+    if (!nearestStore) {
+      return res.status(404).json({ message: 'No nearby stores found' });
+    }
+
+    // Check if the user is within 10 km of the nearest store
+    const userWithinRange = minDistance <= 10000;
 
     // Fetch all menu items (without filtering by store)
     const allMenuItems = await MenuModels.find({ availability: true });
@@ -257,6 +271,7 @@ const findNearestStoreAndDisplayMenu = async (req, res) => {
 
     res.json({
       message: `Menu retrieved successfully`,
+      nearestStore,
       canOrder: userWithinRange, // true if within 10 km, false otherwise
       menu: allMenuItems.map(item => ({
         ...item._doc,
@@ -272,6 +287,7 @@ const findNearestStoreAndDisplayMenu = async (req, res) => {
     });
   }
 };
+
 
 
 

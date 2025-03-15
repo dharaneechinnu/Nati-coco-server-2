@@ -58,4 +58,4 @@ const deleteSlot = async (req, res) => {
   }
 };
 
-export { addSlot, getAvailableSlots, deleteSlot };
+module.exports = { addSlot, getAvailableSlots, deleteSlot };
