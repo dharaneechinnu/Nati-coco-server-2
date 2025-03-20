@@ -4,7 +4,7 @@ const { createOrder, verifyPayment, cancelAndRefundOrder } = require('../Control
 
 router.post("/orders", createOrder);
 router.post("/verify", verifyPayment);
-router.post("/cancel/:orderId",cancelAndRefundOrder)
+router.post("/cancel/:orderId",cancelAndRefundOrder);//Update by dharanee
 
 
 module.exports = router;
