@@ -204,4 +204,56 @@ const addAdminMenuItem = async (req, res) => {
   });
 
 };
-module.exports = {loginAdmin,AddChickenStore,getCityOwners,addAdminMenuItem};
+
+
+const DeleteStoreById = async (req, res) => {
+  const { storeId } = req.params; // The store ID will be passed as a parameter in the URL
+
+  try {
+    // Check if the store exists
+    const store = await CityAdmin.findById(storeId); // Assuming you're using CityAdmin model for stores
+    if (!store) {
+      return res.status(404).json({ message: 'Store not found' });
+    }
+
+    // Delete the store from the database
+    await CityAdmin.findByIdAndDelete(storeId);
+
+    res.status(200).json({ message: 'Store deleted successfully' });
+  } catch (error) {
+    console.error('Error during store deletion:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+};
+
+const renameStore = async (req, res) => {
+  const { storeId } = req.params; // Store ID passed as a URL parameter
+  const { newName } = req.body; // New store name from the request body
+
+  // Validate new name
+  if (!newName) {
+    return res.status(400).json({ message: 'New store name is required' });
+  }
+
+  try {
+    // Find the store by ID
+    const store = await CityAdmin.findById(storeId); // Assuming you are using CityAdmin model for stores
+
+    if (!store) {
+      return res.status(404).json({ message: 'Store not found' });
+    }
+
+    // Update the store's name
+    store.name = newName;
+
+    // Save the updated store
+    await store.save();
+
+    res.status(200).json({ message: 'Store name updated successfully', store });
+  } catch (error) {
+    console.error('Error during store renaming:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+};
+
+module.exports = {loginAdmin,AddChickenStore,getCityOwners,addAdminMenuItem,DeleteStoreById,renameStore};
