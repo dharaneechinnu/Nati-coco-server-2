@@ -11,7 +11,6 @@ const twilioClient = twilio(accountSid, authToken);
 // Generate 6-digit OTP
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
-
 const sendOtp = async (req, res) => {
     try {
         const { mobileno } = req.body;
@@ -20,25 +19,21 @@ const sendOtp = async (req, res) => {
             return res.status(400).json({ message: "Phone number is required" });
         }
 
-        // Check if user exists or create a new one
         let user = await userModel.findOne({ mobileno });
         if (!user) {
             user = await userModel.create({ mobileno });
         }
 
-        // Generate OTP
         const otp = generateOTP();
         console.log("Generated OTP:", otp);
 
-        // Send OTP via Twilio
         twilioClient.messages
             .create({
                 body: `Your verification code is: ${otp}`,
-                from: senderID, // Twilio-approved number
+                from: senderID,
                 to: mobileno
             })
             .then(async () => {
-                // Save OTP & expiry time in DB
                 user.otpToken = otp;
                 user.otpExpire = Date.now() + 5 * 60 * 1000; // OTP expires in 5 minutes
                 await user.save();
@@ -56,7 +51,6 @@ const sendOtp = async (req, res) => {
     }
 };
 
-
 const verifyOtp = async (req, res) => {
     try {
         const { mobileno, otp } = req.body;
@@ -65,7 +59,6 @@ const verifyOtp = async (req, res) => {
             return res.status(400).json({ message: "Phone number and OTP are required" });
         }
 
-        // Find user
         const user = await userModel.findOne({ mobileno });
 
         if (!user) {
@@ -80,7 +73,6 @@ const verifyOtp = async (req, res) => {
             return res.status(400).json({ message: "Invalid OTP" });
         }
 
-        // OTP Verified - Update user status
         user.otpToken = null;
         user.otpExpire = null;
         user.verified = true;
@@ -94,5 +86,38 @@ const verifyOtp = async (req, res) => {
     }
 };
 
+// Get user by ID
+const GetOneUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
 
-module.exports = { sendOtp, verifyOtp };
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
+
+        const user = await userModel.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ user });
+
+    } catch (error) {
+        console.error("Error fetching user by ID:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+// Get all users
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await userModel.find();
+        res.status(200).json({ users });
+    } catch (error) {
+        console.error("Error fetching all users:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+module.exports = { sendOtp, verifyOtp, GetOneUser, getAllUsers };
